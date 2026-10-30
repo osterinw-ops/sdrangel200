@@ -355,6 +355,23 @@ elseif(WIN32 OR MINGW)
       Delete '$INSTDIR\\\\${VCREDIST_FILE}'
     ")
 
+    # Optional USRP bundle (lite build): FPGA/firmware images and WinUSB driver
+    # SDRANGEL_USRP_BUNDLE_DIR must contain images/ and driver/ sub-folders
+    if(SDRANGEL_USRP_BUNDLE_DIR)
+      install(DIRECTORY "${SDRANGEL_USRP_BUNDLE_DIR}/images/" DESTINATION "uhd/images")
+      install(DIRECTORY "${SDRANGEL_USRP_BUNDLE_DIR}/driver/" DESTINATION "uhd/driver")
+      configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/usrp_driver.nsh.in"
+        "${CMAKE_BINARY_DIR}/usrp_driver.nsh"
+        COPYONLY
+      )
+      file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/usrp_driver.nsh" USRP_DRIVER_NSH)
+      string(REPLACE "\\" "\\\\" USRP_DRIVER_NSH "${USRP_DRIVER_NSH}")
+      list(APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+      !include '${USRP_DRIVER_NSH}'
+      ")
+    endif()
+
     # The Claude Desktop extension, in a file of its own: CPack writes
     # CPACK_NSIS_EXTRA_INSTALL_COMMANDS into CPackConfig.cmake without escaping it, so the
     # commands themselves cannot contain a quote

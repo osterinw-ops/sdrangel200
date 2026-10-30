@@ -1,0 +1,9 @@
+; Installs the Ettus Research WinUSB driver for USRP B2xx devices (bundled in uhd\driver).
+; pnputil lives in the 64-bit System32; the NSIS installer is 32-bit, hence Sysnative.
+DetailPrint "Installing USRP B2xx USB driver..."
+IfFileExists "$WINDIR\Sysnative\pnputil.exe" 0 +3
+  nsExec::ExecToLog '"$WINDIR\Sysnative\pnputil.exe" /add-driver "$INSTDIR\uhd\driver\*.inf" /subdirs /install'
+  Goto +2
+  nsExec::ExecToLog '"$SYSDIR\pnputil.exe" /add-driver "$INSTDIR\uhd\driver\*.inf" /subdirs /install'
+Pop $0
+DetailPrint "pnputil exit code: $0"

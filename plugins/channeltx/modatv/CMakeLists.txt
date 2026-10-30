@@ -1,5 +1,11 @@
 project(modatv)
 
+option(ATVMOD_NO_CAMERA "Build ATV modulator without camera (webcam) support" OFF)
+if(ATVMOD_NO_CAMERA)
+    add_definitions(-DATVMOD_NO_CAMERA)
+    message(STATUS "modatv: camera support disabled (ATVMOD_NO_CAMERA=ON)")
+endif()
+
 set(modatv_SOURCES
     atvmod.cpp
     atvmodbaseband.cpp

@@ -27,6 +27,7 @@
 #include <QFontDatabase>
 #include <QSysInfo>
 #include <QSettings>
+#include <QDir>
 #include <exception>
 #include <cstdlib>
 #if defined(HAVE_LIBUNWIND)
@@ -183,6 +184,17 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     }
 
     SDRangelApplication a(argc, argv);
+
+#ifdef _WIN32
+    // Use USRP (UHD) FPGA/firmware images bundled next to the executable, unless the user set their own
+    if (qgetenv("UHD_IMAGES_DIR").isEmpty())
+    {
+        const QString uhdImagesDir = QCoreApplication::applicationDirPath() + QStringLiteral("/uhd/images");
+        if (QDir(uhdImagesDir).exists()) {
+            qputenv("UHD_IMAGES_DIR", QDir::toNativeSeparators(uhdImagesDir).toLocal8Bit());
+        }
+    }
+#endif
 
     // Give the desktop environment an exact desktop-entry ID so startup
     // notification, window activation, taskbar grouping, and icons do not

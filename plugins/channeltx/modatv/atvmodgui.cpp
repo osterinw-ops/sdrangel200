@@ -29,6 +29,7 @@
 #include <QMessageBox>
 
 #include <cmath>
+#include <initializer_list>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -111,6 +112,16 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
     m_atvMod->setLevelMeter(ui->volumeMeter);
+
+#ifdef ATVMOD_NO_CAMERA
+    // Camera support removed at build time: drop the "Camera" input (last entry) and hide camera controls
+    ui->inputSelect->removeItem((int) ATVModSettings::ATVModInputCamera);
+    for (QWidget *w : std::initializer_list<QWidget*>{
+            ui->camLabel, ui->playCamera, ui->camSelect, ui->cameraDeviceNumber, ui->cameraImageSize,
+            ui->camerFPS, ui->cameraManualFPSEnable, ui->cameraManualFPS, ui->cameraManualFPSText}) {
+        w->hide();
+    }
+#endif
 
     std::vector<int> cameraNumbers;
     m_atvMod->getCameraNumbers(cameraNumbers);
@@ -812,6 +823,11 @@ void ATVModGUI::displaySettings()
     m_settings.m_fps = getFPS(); // normalize
 
     ui->standard->setCurrentIndex((int) m_settings.m_atvStd);
+#ifdef ATVMOD_NO_CAMERA
+    if (m_settings.m_atvModInput == ATVModSettings::ATVModInputCamera) {
+        m_settings.m_atvModInput = ATVModSettings::ATVModInputImage;
+    }
+#endif
     ui->inputSelect->setCurrentIndex((int) m_settings.m_atvModInput);
 
     ui->invertVideo->setChecked(m_settings.m_invertedVideo);

@@ -437,7 +437,8 @@ void ATVModSource::pullVideo(Real& sample)
                     m_videoFPSCount = m_videoFPSq;
                 }
             }
-            else if ((m_settings.m_atvModInput == ATVModSettings::ATVModInputCamera) && (m_settings.m_cameraPlay))
+            else if ((m_settings.m_atvModInput == ATVModSettings::ATVModInputCamera) && (m_settings.m_cameraPlay)
+                && (m_cameraIndex >= 0) && (m_cameraIndex < (int) m_cameras.size()))
             {
                 ATVCamera& camera = m_cameras[m_cameraIndex];
 
@@ -831,6 +832,10 @@ void ATVModSource::resizeCameras()
 
 void ATVModSource::resizeCamera()
 {
+    if ((m_cameraIndex < 0) || (m_cameraIndex >= (int) m_cameras.size())) {
+        return;
+    }
+
     if (!m_cameras[m_cameraIndex].m_videoframeOriginal.empty()) {
         cv::resize(m_cameras[m_cameraIndex].m_videoframeOriginal, m_cameras[m_cameraIndex].m_videoFrame, cv::Size(), m_cameras[m_cameraIndex].m_videoFx, m_cameras[m_cameraIndex].m_videoFy); // resize current frame
     }
@@ -850,6 +855,10 @@ void ATVModSource::seekVideoFileStream(int seekPercentage)
 
 void ATVModSource::scanCameras()
 {
+#ifdef ATVMOD_NO_CAMERA
+    qDebug("ATVModSource::scanCameras: camera support disabled at build time (ATVMOD_NO_CAMERA)");
+    return;
+#endif
     for (int i = 0; i < 4; i++)
     {
         ATVCamera newCamera;
