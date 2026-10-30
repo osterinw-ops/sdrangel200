@@ -6,6 +6,13 @@ on:
       - lite
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-lite-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Windows-x64-lite
@@ -75,54 +82,56 @@ jobs:
           test -n "$(find $B/driver -iname '*.inf')"
           echo "USRP_BUNDLE=$(cygpath -m "$PWD/$B")" >> "$GITHUB_ENV"
       - name: Build SDRangel Lite
+        shell: bash
         run: |
+          set -o pipefail
           mkdir build && cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_QT6=ON -DARCH_OPT=SSE4_2 -DBUILD_SERVER=OFF `
-            -DSDRANGEL_USRP_BUNDLE_DIR="$env:USRP_BUNDLE" `
-            -DCMAKE_PREFIX_PATH="C:\Qt\$env:QT_VERSION\msvc2022_64;C:\Libraries\boost_1_73_0" `
-            "-DENABLE_CHANNELRX=OFF" `
-            "-DENABLE_CHANNELMIMO=OFF" `
-            "-DENABLE_FEATURE=OFF" `
-            "-DENABLE_USRP=ON" `
-            "-DATVMOD_NO_CAMERA=ON" `
-            "-DENABLE_AARONIARTSA=OFF" `
-            "-DENABLE_AIRSPY=OFF" `
-            "-DENABLE_AIRSPYHF=OFF" `
-            "-DENABLE_BLADERF=OFF" `
-            "-DENABLE_FUNCUBE=OFF" `
-            "-DENABLE_HACKRF=OFF" `
-            "-DENABLE_IIO=OFF" `
-            "-DENABLE_LIMESUITE=OFF" `
-            "-DENABLE_METIS=OFF" `
-            "-DENABLE_MIRISDR=OFF" `
-            "-DENABLE_PERSEUS=OFF" `
-            "-DENABLE_RTLSDR=OFF" `
-            "-DENABLE_SDRPLAY=OFF" `
-            "-DENABLE_SOAPYSDR=OFF" `
-            "-DENABLE_XTRX=OFF" `
-            "-DENABLE_FOBOS=OFF" `
-            "-DENABLE_CHANNELTX_MODM17=OFF" `
-            "-DENABLE_CHANNELTX_MODNFM=OFF" `
-            "-DENABLE_CHANNELTX_MODAIS=OFF" `
-            "-DENABLE_CHANNELTX_LOCALSOURCE=OFF" `
-            "-DENABLE_CHANNELTX_MODDATV=OFF" `
-            "-DENABLE_CHANNELTX_MODAM=OFF" `
-            "-DENABLE_CHANNELTX_MODFREEDV=OFF" `
-            "-DENABLE_CHANNELTX_MODPACKET=OFF" `
-            "-DENABLE_CHANNELTX_MODSSB=OFF" `
-            "-DENABLE_CHANNELTX_UDPSOURCE=OFF" `
-            "-DENABLE_CHANNELTX_MODCHIRPCHAT=OFF" `
-            "-DENABLE_CHANNELTX_MODMESHTASTIC=OFF" `
-            "-DENABLE_CHANNELTX_MODMESHCORE=OFF" `
-            "-DENABLE_CHANNELTX_MODWFM=OFF" `
-            "-DENABLE_CHANNELTX_MODBFM=OFF" `
-            "-DENABLE_CHANNELTX_MODATV=ON" `
-            "-DENABLE_CHANNELTX_MOD802.15.4=OFF" `
-            "-DENABLE_CHANNELTX_REMOTESOURCE=OFF" `
-            "-DENABLE_CHANNELTX_FILESOURCE=OFF" `
-            "-DENABLE_CHANNELTX_MODRTTY=OFF" `
-            "-DENABLE_CHANNELTX_MODPSK31=OFF"
-          cmake --build . --config Release --target package
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DENABLE_QT6=ON -DARCH_OPT=SSE4_2 -DBUILD_SERVER=OFF \
+            "-DSDRANGEL_USRP_BUNDLE_DIR=$USRP_BUNDLE" \
+            "-DCMAKE_PREFIX_PATH=C:/Qt/$QT_VERSION/msvc2022_64;C:/Libraries/boost_1_73_0" \
+            "-DENABLE_CHANNELRX=OFF" \
+            "-DENABLE_CHANNELMIMO=OFF" \
+            "-DENABLE_FEATURE=OFF" \
+            "-DENABLE_USRP=ON" \
+            "-DATVMOD_NO_CAMERA=ON" \
+            "-DENABLE_AARONIARTSA=OFF" \
+            "-DENABLE_AIRSPY=OFF" \
+            "-DENABLE_AIRSPYHF=OFF" \
+            "-DENABLE_BLADERF=OFF" \
+            "-DENABLE_FUNCUBE=OFF" \
+            "-DENABLE_HACKRF=OFF" \
+            "-DENABLE_IIO=OFF" \
+            "-DENABLE_LIMESUITE=OFF" \
+            "-DENABLE_METIS=OFF" \
+            "-DENABLE_MIRISDR=OFF" \
+            "-DENABLE_PERSEUS=OFF" \
+            "-DENABLE_RTLSDR=OFF" \
+            "-DENABLE_SDRPLAY=OFF" \
+            "-DENABLE_SOAPYSDR=OFF" \
+            "-DENABLE_XTRX=OFF" \
+            "-DENABLE_FOBOS=OFF" \
+            "-DENABLE_CHANNELTX_MODM17=OFF" \
+            "-DENABLE_CHANNELTX_MODNFM=OFF" \
+            "-DENABLE_CHANNELTX_MODAIS=OFF" \
+            "-DENABLE_CHANNELTX_LOCALSOURCE=OFF" \
+            "-DENABLE_CHANNELTX_MODDATV=OFF" \
+            "-DENABLE_CHANNELTX_MODAM=OFF" \
+            "-DENABLE_CHANNELTX_MODFREEDV=OFF" \
+            "-DENABLE_CHANNELTX_MODPACKET=OFF" \
+            "-DENABLE_CHANNELTX_MODSSB=OFF" \
+            "-DENABLE_CHANNELTX_UDPSOURCE=OFF" \
+            "-DENABLE_CHANNELTX_MODCHIRPCHAT=OFF" \
+            "-DENABLE_CHANNELTX_MODMESHTASTIC=OFF" \
+            "-DENABLE_CHANNELTX_MODMESHCORE=OFF" \
+            "-DENABLE_CHANNELTX_MODWFM=OFF" \
+            "-DENABLE_CHANNELTX_MODBFM=OFF" \
+            "-DENABLE_CHANNELTX_MODATV=ON" \
+            "-DENABLE_CHANNELTX_MOD802.15.4=OFF" \
+            "-DENABLE_CHANNELTX_REMOTESOURCE=OFF" \
+            "-DENABLE_CHANNELTX_FILESOURCE=OFF" \
+            "-DENABLE_CHANNELTX_MODRTTY=OFF" \
+            "-DENABLE_CHANNELTX_MODPSK31=OFF" 2>&1 | tee ../build.log
+          cmake --build . --config Release --target package 2>&1 | tee -a ../build.log
       - name: List plugins in package
         shell: bash
         run: find build/_CPack_Packages -path '*plugins*' -name '*.dll' | sed 's|.*/||' | sort
@@ -131,3 +140,13 @@ jobs:
         with:
           name: sdrangel-lite-win64-installer
           path: build/sdrangel-*-win64.exe
+      - name: Publish build log on failure (branch ci-logs)
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p /tmp/ci && cd /tmp/ci
+          git init -q && git checkout -q -b ci-logs
+          { echo "run: ${{ github.run_id }} sha: ${{ github.sha }}"; echo; tail -n 3000 "$GITHUB_WORKSPACE/build.log" 2>/dev/null || echo "no build.log (failed before build step)"; } > build-tail.log
+          grep -n -i -E "error|fatal" "$GITHUB_WORKSPACE/build.log" 2>/dev/null | head -400 > errors.log || true
+          git add . && git -c user.name=ci -c user.email=ci@localhost commit -q -m "build log for run ${{ github.run_id }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-logs
